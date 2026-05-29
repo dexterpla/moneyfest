@@ -194,6 +194,34 @@ button,a{font:inherit}
 .record-toast.ach{background:linear-gradient(180deg,var(--teal),var(--teal-d));color:#fff;border-color:#eafffb}
 .over-record{font-family:"Russo One";color:var(--yellow);margin:2px 0 6px}
 [data-theme="light"] .over-record{color:#c77f00}
+.sp{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(15px,4.4vw,26px);pointer-events:none;z-index:3;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55))}
+.tile.special .coin{box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 14px 3px var(--rim),inset 0 -7px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.5);animation:sppulse 1.1s ease-in-out infinite}
+.tile.sp-bomb .coin{box-shadow:0 0 0 3px rgba(255,255,255,.9),0 0 18px 5px #ff5a5a,inset 0 -7px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.5)}
+@keyframes sppulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.28)}}
+.pu-row{display:flex;align-items:center;gap:6px;margin-top:8px}
+.pu{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;min-height:34px;padding:4px 6px;border:0;border-radius:11px;cursor:pointer;font:inherit;font-size:13px;font-weight:700;color:#fff;background:rgba(120,130,150,.28);opacity:.55;transition:transform .12s,opacity .2s,background .2s}
+.pu .pu-i{font-size:15px;line-height:1}
+.pu .pu-cap{font-size:11px;font-weight:700;letter-spacing:.2px}
+.pu .pu-n{min-width:16px;height:16px;line-height:16px;border-radius:8px;background:rgba(0,0,0,.32);font-size:11px;text-align:center;padding:0 3px}
+.pu.ready{opacity:1;background:linear-gradient(135deg,#22c55e,#0ea5e9);box-shadow:0 2px 10px rgba(14,165,233,.4)}
+.pu.ready:active{transform:scale(.94)}
+.pu:disabled{cursor:default}
+.pu-energy{flex:0 0 46px;height:8px;border-radius:6px;background:rgba(120,130,150,.3);overflow:hidden}
+.pu-energy>span{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#f59e0b,#22c55e);transition:width .25s}
+@media(max-width:430px){.pu .pu-cap{display:none}.pu-energy{flex-basis:34px}}
+.vol{position:absolute;top:3%;right:3%;min-width:38%;height:38%;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff8a8a,#dc2626);color:#fff;font-weight:800;font-size:clamp(11px,3.2vw,17px);box-shadow:0 1px 4px rgba(0,0,0,.5);pointer-events:none;z-index:4;animation:volpulse .9s ease-in-out infinite}
+@keyframes volpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.endless-hud.frozen-timer .goal-fill{background:linear-gradient(90deg,#38bdf8,#0ea5e9)!important;animation:none}
+.endless-hud.frozen-timer .goal-track{box-shadow:0 0 0 2px rgba(56,189,248,.5)}
+.pause-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.rules-card{text-align:left;max-width:430px}
+.rules-list{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:7px;font-size:14px;line-height:1.35}
+.rules-list b{font-weight:800}
+.legend{display:flex;flex-direction:column;gap:6px;margin:6px 0 12px;font-size:12.5px;line-height:1.3;opacity:.92}
+.legend .leg{display:flex;align-items:center;gap:7px}
+.leg-ice{flex:0 0 auto;width:16px;height:16px;border-radius:4px;background:radial-gradient(circle at 36% 30%,rgba(255,255,255,.85),rgba(165,215,245,.65));border:1px solid rgba(120,180,220,.7)}
+.leg-coin{flex:0 0 auto;display:inline-grid;place-items:center;min-width:30px;height:18px;padding:0 4px;border-radius:9px;background:linear-gradient(135deg,#26a17b,#1f8f6c);color:#fff;font-weight:800;font-size:10px}
+.leg-vol{flex:0 0 auto;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#dc2626;color:#fff;font-weight:800;font-size:11px}
 .tile.match{animation:pop .36s ease forwards}
 .tile.fall{animation:drop .32s cubic-bezier(.16,.84,.3,1.1)}
 .tile.shake{animation:shake .32s ease}
@@ -362,6 +390,7 @@ body.dock-pad{padding-bottom:150px}
         </div>
       </div>
       <div class="top-right">
+        <button id="soundBtn" class="icon-btn" type="button" aria-label="Звук вкл/выкл">🔊</button>
         <button id="themeBtn" class="icon-btn" type="button" aria-label="Переключить тему"></button>
         <div class="score-box">
           <span>Очки</span>
@@ -378,6 +407,12 @@ body.dock-pad{padding-bottom:150px}
     <div class="goal endless-hud" id="endlessHud" style="display:none">
       <div class="goal-track"><div class="goal-fill" id="timeFill"></div></div>
       <div class="goal-meta"><span id="waveLabel">Волна 1</span><span id="bestLabel">Рекорд 0</span><span>⏱ <b id="timeLabel">28</b> с</span></div>
+      <div class="pu-row">
+        <button id="puPump" class="pu" type="button" disabled title="Памп: очистить ряд (заряжается за комбо)"><span class="pu-i">📈</span><span class="pu-cap">Памп</span><span class="pu-n" id="puPumpN">0</span></button>
+        <button id="puStable" class="pu" type="button" disabled title="Стейблкоин: заморозить таймер на 5 с"><span class="pu-i">🪙</span><span class="pu-cap">Стейбл</span><span class="pu-n" id="puStableN">0</span></button>
+        <button id="puAir" class="pu" type="button" disabled title="Аирдроп: +8 секунд"><span class="pu-i">🎁</span><span class="pu-cap">Аирдроп</span><span class="pu-n" id="puAirN">0</span></button>
+        <div class="pu-energy" title="Энергия комбо"><span id="puEnergyFill"></span></div>
+      </div>
     </div>
 
     <div class="board-wrap">
@@ -388,6 +423,7 @@ body.dock-pad{padding-bottom:150px}
       <p id="message" class="status">Перетаскивайте монеты, собирайте 3+ в ряд — маскот расскажет о валютах.</p>
       <button id="shuffleBtn" class="btn btn-ghost" type="button">Перемешать</button>
       <button id="recordsBtn" class="btn btn-ghost" type="button" style="display:none">🏆 Рекорды</button>
+      <button id="pauseBtn" class="btn btn-ghost" type="button" style="display:none">⏸ Пауза</button>
     </div>
     <p class="hint-row">Перетащите монету на соседнюю, чтобы поменять их местами</p>
     <button id="directEndlessBtn" class="btn btn-ghost staff-cta" type="button" style="display:none">🚀 Сразу в бесконечный режим</button>
@@ -433,6 +469,37 @@ body.dock-pad{padding-bottom:150px}
   </div>
 </div>
 
+<div id="pauseModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <p class="b-eye">⏸ Пауза</p>
+    <h2>Игра на паузе</h2>
+    <p>Таймер остановлен. Можно выдохнуть.</p>
+    <div class="pause-actions">
+      <button id="pauseResume" class="btn" type="button">▶ Продолжить</button>
+      <button id="pauseSound" class="btn btn-ghost" type="button">🔊 Звук: вкл</button>
+      <button id="pauseRestart" class="btn btn-ghost" type="button">↻ Заново</button>
+    </div>
+  </div>
+</div>
+<div id="rulesModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-card rules-card">
+    <p class="b-eye">📘 Как играть</p>
+    <h2>Режим трейдера</h2>
+    <ul class="rules-list">
+      <li><b>⏱ Таймер.</b> Собирайте комбинации, пока не кончилось время — каждый матч добавляет секунды.</li>
+      <li><b>🔗 Комбо.</b> Цепочки совпадений подряд дают больше очков и заряжают усиления.</li>
+      <li><b>⚡ Спец-плитки.</b> 4 в ряд → плитка-линия (чистит ряд и столбец), 5 → бомба 💥 (зона 3×3).</li>
+      <li><b>🎁 Усиления.</b> Памп 📈 — очистить ряд, Стейблкоин 🪙 — заморозить таймер на 5 с, Аирдроп 🎁 — +время. Копятся за комбо.</li>
+    </ul>
+    <div class="legend">
+      <span class="leg"><span class="leg-ice"></span> Лёд — «холодный кошелёк»: двигать нельзя, разбейте матчем рядом или взрывом.</span>
+      <span class="leg"><span class="leg-coin">USDT</span> 6-я монета — стейблкоин, появляется на поздних волнах.</span>
+      <span class="leg"><span class="leg-vol">5</span> Волатильность-бомба: счётчик тикает каждый ход; на нуле — заморозит район и отнимет время.</span>
+      <span class="leg">🐻 Медвежий рынок — периодически засыпает поле льдом.</span>
+    </div>
+    <button id="rulesStart" class="btn" type="button">Понятно, играть ▶</button>
+  </div>
+</div>
 <div id="recordsModal" class="modal" role="dialog" aria-modal="true">
   <div class="modal-card">
     <p class="b-eye">🏆 Рекорды</p>
@@ -479,6 +546,14 @@ const boardEl=document.getElementById("board"),scoreEl=document.getElementById("
   badgeGrid=document.getElementById("badgeGrid"),recList=document.getElementById("recList"),
   recClose=document.getElementById("recClose"),recordToast=document.getElementById("recordToast"),
   overRecord=document.getElementById("overRecord");
+const puPump=document.getElementById("puPump"),puStable=document.getElementById("puStable"),
+  puAir=document.getElementById("puAir"),puPumpN=document.getElementById("puPumpN"),
+  puStableN=document.getElementById("puStableN"),puAirN=document.getElementById("puAirN"),
+  puEnergyFill=document.getElementById("puEnergyFill"),pauseBtn=document.getElementById("pauseBtn"),
+  pauseModal=document.getElementById("pauseModal"),pauseResume=document.getElementById("pauseResume"),
+  pauseRestart=document.getElementById("pauseRestart"),pauseSound=document.getElementById("pauseSound"),
+  soundBtn=document.getElementById("soundBtn"),rulesModal=document.getElementById("rulesModal"),
+  rulesStart=document.getElementById("rulesStart");
 
 /* ===== config ===== */
 const SIZE=6,GOAL=2990,STEP=270;
@@ -536,8 +611,11 @@ const TUT_TEXT={
 const pool={};
 function primeAudio(){for(const k in SND){const a=new Audio(SND[k]);a.preload="auto";pool[k]=a;}}
 let actx=null;
-function tone(f,d,t,v,f2){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;actx=actx||new C();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain(),n=actx.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(v,n+.02);g.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(g);g.connect(actx.destination);o.start(n);o.stop(n+d+.02);}catch(e){}}
-function sfx(k,vol){const b=pool[k];if(b){try{const a=b.cloneNode();a.volume=vol||.5;const p=a.play();if(p&&p.catch)p.catch(()=>{});return;}catch(e){}}
+function tone(f,d,t,v,f2){if(!soundOn)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;actx=actx||new C();if(actx.state==="suspended")actx.resume();const o=actx.createOscillator(),g=actx.createGain(),n=actx.currentTime;o.type=t;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(v,n+.02);g.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(g);g.connect(actx.destination);o.start(n);o.stop(n+d+.02);}catch(e){}}
+let soundOn=(function(){try{return localStorage.getItem("cm_sound")!=="0";}catch(e){return true;}})();
+function setSound(on){soundOn=on;try{localStorage.setItem("cm_sound",on?"1":"0");}catch(e){}
+  const lbl=on?"🔊":"🔇";if(soundBtn)soundBtn.textContent=lbl;if(pauseSound)pauseSound.textContent=on?"🔊 Звук: вкл":"🔇 Звук: выкл";}
+function sfx(k,vol){if(!soundOn)return;const b=pool[k];if(b){try{const a=b.cloneNode();a.volume=vol||.5;const p=a.play();if(p&&p.catch)p.catch(()=>{});return;}catch(e){}}
   if(k==="match")tone(620,.12,"square",.03,860);else if(k==="reward"){tone(523,.16,"triangle",.03);setTimeout(()=>tone(784,.2,"triangle",.03),140);}else tone(440,.1,"sine",.02,520);}
 
 /* ===== mascot ===== */
@@ -633,9 +711,11 @@ function render(extra){
     const b=document.createElement("button");b.type="button";b.className="tile";b.dataset.r=r;b.dataset.c=c;
     b.style.setProperty("--c1",coin.c1);b.style.setProperty("--c2",coin.c2);b.style.setProperty("--rim",coin.rim);b.style.setProperty("--sym",coin.ink);
     b.style.setProperty("--c1l",shade(coin.c1,.45));b.style.setProperty("--c2d",shade(coin.c2,-.28));
-    const fr=board[r][c].fr||0;
-    b.innerHTML=`<span class="coin"><span class="sym">${coin.sym}</span><span class="tick">${coin.tick}</span></span>`+(fr>0?`<span class="frost ${fr>=2?"fr2":"fr1"}"></span>`:"");
+    const fr=board[r][c].fr||0,sp=board[r][c].sp||null,vol=board[r][c].vol||0;
+    b.innerHTML=`<span class="coin"><span class="sym">${coin.sym}</span><span class="tick">${coin.tick}</span></span>`+(fr>0?`<span class="frost ${fr>=2?"fr2":"fr1"}"></span>`:"")+(sp?`<span class="sp sp-${sp}">${sp==="bomb"?"💥":"⚡"}</span>`:"")+(vol>0?`<span class="vol">${vol}</span>`:"");
     if(fr>0)b.classList.add("frozen");
+    if(sp)b.classList.add("special","sp-"+sp);
+    if(vol>0)b.classList.add("volatile");
     if(sel&&sel.r===r&&sel.c===c)b.classList.add("sel");
     if(fall.has(key))b.classList.add("fall");
     const cl=extra.get(key);if(cl)cl.forEach(x=>b.classList.add(x));
@@ -653,7 +733,7 @@ function cellSize(){const w=boardEl.getBoundingClientRect().width;return w?w/SIZ
 function isHintTile(r,c){return !!tutHint&&((tutHint.a.r===r&&tutHint.a.c===c)||(tutHint.b.r===r&&tutHint.b.c===c));}
 function isHintMove(a,b){return !!tutHint&&(((a.r===tutHint.a.r&&a.c===tutHint.a.c)&&(b.r===tutHint.b.r&&b.c===tutHint.b.c))||((a.r===tutHint.b.r&&a.c===tutHint.b.c)&&(b.r===tutHint.a.r&&b.c===tutHint.a.c)));}
 function trySwap(a,b){
-  if(busy||rewardShown)return;
+  if(busy||rewardShown||paused)return;
   if(tutorial&&!isHintMove(a,b))return;            // scripted: only the highlighted swap is allowed
   if(endless&&(board[a.r][a.c].fr||board[b.r][b.c].fr))return; // frozen tiles are locked
   if(b.r<0||b.c<0||b.r>=SIZE||b.c>=SIZE)return;
@@ -666,7 +746,7 @@ function springBack(el){if(el){el.style.transition="transform .2s cubic-bezier(.
 function dirNeighbor(d){let nr=d.r,nc=d.c;if(d.horiz)nc+=d.dx>0?1:-1;else nr+=d.dy>0?1:-1;
   return (nr>=0&&nc>=0&&nr<SIZE&&nc<SIZE)?{nr,nc}:null;}
 function onTileDown(e,r,c){
-  if(busy||rewardShown)return;
+  if(busy||rewardShown||paused)return;
   if(tutorial&&!isHintTile(r,c)){msgEl.textContent="Сейчас можно двигать только подсвеченную монету.";return;} // scripted lock
   if(endless&&board[r][c].fr){msgEl.textContent="Это «холодный кошелёк» — его не сдвинуть. Разбейте лёд матчем рядом.";return;}
   drag={r,c,x:e.clientX,y:e.clientY,el:e.currentTarget,nEl:null,moved:false,dx:0,dy:0,horiz:true};
@@ -699,7 +779,7 @@ function onPointerUp(){
 function onPointerCancel(){if(!drag)return;const d=drag;drag=null;if(d.el)d.el.classList.remove("drag");springBack(d.el);clearNeighbor(d);}
 
 function tap(r,c){
-  maybeReward();if(busy||rewardShown)return;const cur={r,c};
+  maybeReward();if(busy||rewardShown||paused)return;const cur={r,c};
   if(tutorial){
     if(!isHintTile(r,c)){msgEl.textContent="Сейчас можно двигать только подсвеченную монету.";return;}
     if(!sel){sel=cur;sfx("tap",.4);renderTut();return;}
@@ -713,8 +793,12 @@ function tap(r,c){
 }
 async function resolve(a,b){
   busy=true;sfx("swap",.45);swap(a,b);sel=null;render();
-  if(!findMatches().length){
-    await wait(STEP);swap(a,b);
+  lastSwap={a:{r:a.r,c:a.c},b:{r:b.r,c:b.c}};
+  pendingBlasts=[];
+  if(board[a.r][a.c].sp)pendingBlasts.push({r:a.r,c:a.c});
+  if(board[b.r][b.c].sp)pendingBlasts.push({r:b.r,c:b.c});
+  if(!findMatches().length&&!pendingBlasts.length){
+    await wait(STEP);swap(a,b);lastSwap=null;
     render(new Map([[a.r+"-"+a.c,["shake"]],[b.r+"-"+b.c,["shake"]]]));
     sfx("bad",.45);
     if(tutorial){msgEl.textContent="Так ряд не собрать. Перетащите подсвеченную монету на соседнюю.";setTimeout(()=>{if(tutorial)renderTut();},360);}
@@ -727,6 +811,7 @@ async function resolve(a,b){
     if(tutMatched){tutStep++;if(tutStep>=COINS.length)endTutorial();else setupTutStep();}
     else{setupTutStep();msgEl.textContent=`Нужно собрать именно ${COINS[tutStep].id}. Перетащите подсвеченную монету.`;}
   }
+  if(endless&&!gameover){tickVolBombs();render();}
   busy=false;
 }
 function findMatches(){
@@ -735,30 +820,77 @@ function findMatches(){
   for(let c=0;c<SIZE;c++){let s=1;for(let r=1;r<=SIZE;r++){const cur=r<SIZE?board[r][c]:null,pr=board[r-1][c];if(r<SIZE&&same(cur,pr))s++;else{if(s>=3)for(let o=0;o<s;o++)m.add((r-1-o)+"-"+c);s=1;}}}
   return[...m].map(k=>{const[r,c]=k.split("-").map(Number);return{r,c};});
 }
+/* ===== special tiles: 4-in-row -> line-clear (⚡), 5+ -> bomb (💥) ===== */
+let lastSwap=null,pendingBlasts=[];
+function findRuns(){
+  const runs=[];
+  for(let r=0;r<SIZE;r++){let s=1;for(let c=1;c<=SIZE;c++){const cur=c<SIZE?board[r][c]:null,pr=board[r][c-1];
+    if(c<SIZE&&same(cur,pr))s++;else{if(s>=3){const cells=[];for(let o=0;o<s;o++)cells.push({r,c:c-1-o});runs.push({cells,len:s,horiz:true});}s=1;}}}
+  for(let c=0;c<SIZE;c++){let s=1;for(let r=1;r<=SIZE;r++){const cur=r<SIZE?board[r][c]:null,pr=board[r-1][c];
+    if(r<SIZE&&same(cur,pr))s++;else{if(s>=3){const cells=[];for(let o=0;o<s;o++)cells.push({r:r-1-o,c});runs.push({cells,len:s,horiz:false});}s=1;}}}
+  return runs;
+}
+function expandClear(seed){
+  const out=new Set(),q=[];
+  seed.forEach(p=>q.push(p.r+"-"+p.c));
+  while(q.length){const k=q.shift();if(out.has(k))continue;out.add(k);
+    const[r,c]=k.split("-").map(Number);const sp=board[r]&&board[r][c]&&board[r][c].sp;
+    if(sp==="line"){for(let i=0;i<SIZE;i++){q.push(r+"-"+i);q.push(i+"-"+c);}}
+    else if(sp==="bomb"){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nc>=0&&nr<SIZE&&nc<SIZE)q.push(nr+"-"+nc);}}
+  }
+  return out;
+}
 async function cascade(){
-  let chain=0,matches=findMatches();
-  while(matches.length){
+  let chain=0;
+  while(true){
+    const runs=findRuns();
+    const matchSet=new Set();
+    runs.forEach(run=>run.cells.forEach(p=>matchSet.add(p.r+"-"+p.c)));
+    const blasts=pendingBlasts;pendingBlasts=[];
+    if(!matchSet.size&&!blasts.length)break;
     chain++;
-    const id=board[matches[0].r][matches[0].c].id;lastCoin=id;
-    if(tutorial){if(matches.some(m=>board[m.r][m.c].id===COINS[tutStep].id))tutMatched=true;}
-    render(new Map(matches.map(m=>[m.r+"-"+m.c,["match"]])));
+    let fid=null;for(const k of matchSet){const[r,c]=k.split("-").map(Number);fid=board[r][c].id;break;}
+    if(fid!=null)lastCoin=fid;
+    if(tutorial&&fid!=null){for(const k of matchSet){const[r,c]=k.split("-").map(Number);if(board[r][c].id===COINS[tutStep].id){tutMatched=true;break;}}}
+    /* spawn specials from runs of 4+/5+ (skipped in tutorial) */
+    const spawns=[];
+    if(!tutorial)runs.forEach(run=>{if(run.len>=4){
+      let cell=null;
+      if(chain===1&&lastSwap){for(const cand of [lastSwap.b,lastSwap.a]){if(run.cells.some(p=>p.r===cand.r&&p.c===cand.c)){cell=cand;break;}}}
+      if(!cell)cell=run.cells[Math.floor(run.cells.length/2)];
+      if(!board[cell.r][cell.c].sp)spawns.push({r:cell.r,c:cell.c,sp:run.len>=5?"bomb":"line",id:board[cell.r][cell.c].id});
+    }});
+    const spawnKeys=new Set(spawns.map(s=>s.r+"-"+s.c));
+    /* full clear set incl. recursive detonation of specials */
+    const seed=[...matchSet].map(k=>{const[r,c]=k.split("-").map(Number);return{r,c};}).concat(blasts);
+    const clearSet=expandClear(seed);
+    spawnKeys.forEach(k=>clearSet.delete(k));
+    render(new Map([...clearSet].map(k=>[k,["match"]])));
     sfx("match",Math.min(.46+(chain-1)*.05,.62));
-    if(chain===1&&!tutorial&&!endless)coinHint(id,false);
+    if(clearSet.size>matchSet.size||blasts.length)sfx("shuffle",.4);
+    if(chain===1&&!tutorial&&!endless&&fid!=null)coinHint(fid,false);
     await wait(STEP);
-    if(endless)meltAround(matches);
-    matches.forEach(m=>board[m.r][m.c].id=null);
+    if(endless){
+      meltAround([...matchSet].map(k=>{const[r,c]=k.split("-").map(Number);return{r,c};}));
+      let bi=0;clearSet.forEach(k=>{const[r,c]=k.split("-").map(Number);if(board[r][c].fr>0)bi++;});
+      if(bi>0)addIceBroken(bi);
+    }
+    clearSet.forEach(k=>{const[r,c]=k.split("-").map(Number);board[r][c].id=null;board[r][c].fr=0;board[r][c].sp=null;board[r][c].vol=0;});
+    spawns.forEach(s=>{board[s.r][s.c].id=s.id;board[s.r][s.c].sp=s.sp;board[s.r][s.c].fr=0;});
     collapse();refill();render();sfx("drop",.28);
-    if(endless)addEndless(matches.length*50,chain);else addScore(matches.length*50+(chain-1)*35);
+    const gained=clearSet.size*50;
+    if(endless)addEndless(gained,chain);else addScore(gained+(chain-1)*35);
+    lastSwap=null;
     await wait(STEP);
-    matches=(rewardShown&&!endless)?[]:findMatches();
+    if(rewardShown&&!endless)break;
   }
   if(endless){if(!gameover&&!hasMove())endlessShuffle();}
   else if(!tutorial&&!rewardShown&&!hasMove()){doShuffle(true);}
 }
-function collapse(){for(let c=0;c<SIZE;c++){const vals=[];for(let r=SIZE-1;r>=0;r--){const cell=board[r][c];if(cell.id!=null)vals.push({id:cell.id,fr:cell.fr||0});}
-  for(let r=SIZE-1;r>=0;r--){const v=vals[SIZE-1-r];if(v){board[r][c].id=v.id;board[r][c].fr=v.fr;}else{board[r][c].id=null;board[r][c].fr=0;}}}}
+function collapse(){for(let c=0;c<SIZE;c++){const vals=[];for(let r=SIZE-1;r>=0;r--){const cell=board[r][c];if(cell.id!=null)vals.push({id:cell.id,fr:cell.fr||0,sp:cell.sp||null,vol:cell.vol||0});}
+  for(let r=SIZE-1;r>=0;r--){const v=vals[SIZE-1-r];if(v){board[r][c].id=v.id;board[r][c].fr=v.fr;board[r][c].sp=v.sp;board[r][c].vol=v.vol;}else{board[r][c].id=null;board[r][c].fr=0;board[r][c].sp=null;board[r][c].vol=0;}}}}
 function refill(){for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(board[r][c].id==null){
-  board[r][c].id=randId();board[r][c].fr=0;fall.add(r+"-"+c);
+  board[r][c].id=randId();board[r][c].fr=0;board[r][c].sp=null;board[r][c].vol=0;fall.add(r+"-"+c);
   if(endless&&frozenCount()<maxFrozen()&&Math.random()<frozenChance())board[r][c].fr=2;
 }}
 
@@ -805,14 +937,29 @@ function lbLocalAll(){try{return JSON.parse(localStorage.getItem("mf-lb")||"[]")
 function lbLocalAdd(name,score,wave){const a=lbLocalAll();a.push({name,score,wave,ts:Date.now()});
   try{localStorage.setItem("mf-lb",JSON.stringify(a.slice(-200)));}catch(e){}}
 function lbLocalTop(n){return lbBest(lbLocalAll()).slice(0,n||10).map(e=>({name:e.name,score:e.score,wave:e.wave,date:lbFmtDate(e.ts)}));}
+function lbOutbox(){try{return JSON.parse(localStorage.getItem("mf-outbox")||"[]");}catch(e){return[];}}
+function lbSetOutbox(a){try{localStorage.setItem("mf-outbox",JSON.stringify(a.slice(-100)));}catch(e){}}
+function lbAddUrl(it){return LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=add&key="+encodeURIComponent(LB_KEY)
+  +"&name="+encodeURIComponent(it.name)+"&score="+encodeURIComponent(it.score)+"&wave="+encodeURIComponent(it.wave);}
+function lbSend(it){return fetch(lbAddUrl(it),{mode:"no-cors",cache:"no-store"});}
+function isOnline(){return (typeof navigator==="undefined")||navigator.onLine!==false;}
+async function lbFlush(){
+  if(!LB_URL||!isOnline())return;
+  const q=lbOutbox();if(!q.length)return;
+  lbSetOutbox([]);                          // optimistic: no-cors is opaque, can't read status
+  for(const it of q){try{await lbSend(it);}catch(e){const cur=lbOutbox();cur.push(it);lbSetOutbox(cur);}}
+}
 async function lbSubmit(name,score,wave){
   if(!LB_URL){lbLocalAdd(name,score,wave);return lbLocalTop();}
-  const u=LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=add&key="+encodeURIComponent(LB_KEY)
-    +"&name="+encodeURIComponent(name)+"&score="+encodeURIComponent(score)+"&wave="+encodeURIComponent(wave);
-  // запись «неблокируемым» запросом — дойдёт даже если ответ режется CORS
-  try{await fetch(u,{mode:"no-cors",cache:"no-store"});}catch(e){}
-  lbLocalAdd(name,score,wave); // локальная резервная копия
-  return lbTop();              // читаем свежий топ (или локальный фолбэк)
+  lbLocalAdd(name,score,wave);              // local backup always
+  const item={name:String(name),score:Number(score),wave:Number(wave),ts:Date.now()};
+  if(isOnline()){
+    try{await lbSend(item);}catch(e){const q=lbOutbox();q.push(item);lbSetOutbox(q);}
+    lbFlush();                              // also resend anything previously queued
+  }else{
+    const q=lbOutbox();q.push(item);lbSetOutbox(q);
+  }
+  return lbTop();
 }
 async function lbTop(n){n=n||10;
   if(!LB_URL)return lbLocalTop(n);
@@ -917,11 +1064,12 @@ function endlessShuffle(){
 }
 function updateEndlessBar(){const p=Math.max(0,Math.min(100,etime/ETIME_MAX*100));
   timeFill.style.right=(100-p)+"%";timeLabel.textContent=Math.ceil(etime);
-  endlessHud.classList.toggle("low",etime<=6);}
+  endlessHud.classList.toggle("low",etime<=6&&Date.now()>=freezeUntil);
+  endlessHud.classList.toggle("frozen-timer",Date.now()<freezeUntil);}
 function updateEndlessUI(){scoreEl.textContent=endlessScore;waveLabel.textContent="Волна "+wave;
-  bestLabel.textContent="Рекорд "+Math.max(lbGetBest(),endlessScore);updateEndlessBar();}
+  bestLabel.textContent="Рекорд "+Math.max(lbGetBest(),endlessScore);updateEndlessBar();updatePuUI();}
 function addEndless(base,chain){
-  const pts=Math.round(base*chain);endlessScore+=pts;
+  const pts=Math.round(base*chain);endlessScore+=pts;grantEnergy(base,chain);
   etime=Math.min(ETIME_MAX,etime+Math.min(3.2,base*0.012*chain+0.5));
   if(chain>=2)msgEl.textContent="Комбо x"+chain+"! +"+pts;
   if(chain>=4)achUnlock("combo4");
@@ -934,21 +1082,25 @@ function addEndless(base,chain){
 function onWaveUp(){etime=Math.min(ETIME_MAX,etime+4);sfx("reward",.4);
   if(wave>=5)achUnlock("wave5");if(wave>=10)achUnlock("wave10");
   msgEl.textContent="Волна "+wave+" — становится сложнее!";
-  setMascot("detective",{eye:"Волна "+wave,title:"Сложнее!",text:wave>=4?"Появилась шестая монета и больше «холодных кошельков». Держите темп!":"Время убывает быстрее, льда больше. Не сбавляйте темп!"});}
+  setMascot("detective",{eye:"Волна "+wave,title:"Сложнее!",text:wave>=4?"Появилась шестая монета и больше «холодных кошельков». Держите темп!":"Время убывает быстрее, льда больше. Не сбавляйте темп!"});
+  if(wave>=2)spawnVolBomb(Math.max(4,6-Math.floor(wave/3)));
+  if(wave%3===0)bearMarket();
+  render();updatePuUI();}
 function startTimer(){stopTimer();etimerId=setInterval(()=>{
-  if(!endless||gameover)return;
+  if(!endless||gameover||paused)return;
+  if(Date.now()<freezeUntil){updateEndlessBar();return;}
   etime=Math.max(0,etime-0.1*drainRate(wave));updateEndlessBar();
   if(etime<=0)endlessOver();
 },100);}
 function stopTimer(){if(etimerId)clearInterval(etimerId);etimerId=0;}
-function startEndless(){
+function reallyStartEndless(){
   clearTimeout(introT);
   rewardModal.classList.remove("open");overModal.classList.remove("open");
-  endless=true;rewardShown=false;gameover=false;busy=false;sel=null;tutorial=false;
-  endlessScore=0;wave=1;etime=ETIME_START;
+  endless=true;rewardShown=false;gameover=false;busy=false;sel=null;tutorial=false;paused=false;
+  endlessScore=0;wave=1;etime=ETIME_START;resetPowerups();
   runPrevBest=lbGetBest();beatPersonal=false;beatTop=false;runTopOne=0;
   lbTop(1).then(function(t){runTopOne=(t&&t[0]&&Number(t[0].score))||0;}).catch(function(){});
-  goalEl.classList.add("tut-hidden");endlessHud.style.display="";recordsBtn.style.display="";
+  goalEl.classList.add("tut-hidden");endlessHud.style.display="";recordsBtn.style.display="";pauseBtn.style.display="";
   shuffleBtn.textContent="Перемешать";
   build();render();updateEndlessUI();
   mascotEl.style.opacity="1";mascotEl.style.pointerEvents="";
@@ -976,7 +1128,91 @@ async function submitWithName(){
   lbList.innerHTML='<div class="lb-empty">Сохраняем…</div>';
   const top=await lbSubmit(n,endlessScore,wave);renderLeaderboard(top,n);
 }
-function restartEndless(){overModal.classList.remove("open");startEndless();}
+/* ===== power-ups & market events (endless only) ===== */
+let energy=0,puCycle=0,freezeUntil=0,paused=false;
+const ENERGY_MAX=800,PU_KEYS=["pump","air","stable"];
+const pu={pump:0,air:0,stable:0};
+const PU_META={pump:{i:"📈",name:"Памп"},air:{i:"🎁",name:"Аирдроп"},stable:{i:"🪙",name:"Стейблкоин"}};
+function resetPowerups(){energy=0;puCycle=0;freezeUntil=0;pu.pump=0;pu.air=0;pu.stable=0;updatePuUI();}
+function grantEnergy(base,chain){
+  if(!endless)return;energy+=Math.round(base*(1+(Math.max(1,chain)-1)*0.4));
+  while(energy>=ENERGY_MAX){energy-=ENERGY_MAX;const k=PU_KEYS[puCycle%PU_KEYS.length];puCycle++;pu[k]++;
+    flashToast(PU_META[k].i+" Усиление: "+PU_META[k].name,"top");sfx("reward",.4);}
+  updatePuUI();
+}
+function updatePuUI(){
+  if(!puPump)return;
+  puPumpN.textContent=pu.pump;puStableN.textContent=pu.stable;puAirN.textContent=pu.air;
+  const on=endless&&!gameover&&!paused;
+  puPump.disabled=!(on&&pu.pump>0);puStable.disabled=!(on&&pu.stable>0);puAir.disabled=!(on&&pu.air>0);
+  puPump.classList.toggle("ready",pu.pump>0);puStable.classList.toggle("ready",pu.stable>0);puAir.classList.toggle("ready",pu.air>0);
+  puEnergyFill.style.width=Math.min(100,energy/ENERGY_MAX*100)+"%";
+}
+function useAir(){
+  if(busy||paused||!endless||gameover||pu.air<=0)return;
+  pu.air--;etime=Math.min(ETIME_MAX,etime+8);updateEndlessBar();updatePuUI();
+  flashToast("🎁 Аирдроп: +8 секунд","");sfx("reward",.45);
+}
+function useStable(){
+  if(busy||paused||!endless||gameover||pu.stable<=0)return;
+  pu.stable--;freezeUntil=Date.now()+5000;updatePuUI();updateEndlessBar();
+  flashToast("🪙 Стейблкоин: таймер заморожен на 5 с","");sfx("reward",.4);
+}
+async function usePump(){
+  if(busy||paused||!endless||gameover||pu.pump<=0)return;
+  pu.pump--;updatePuUI();busy=true;sel=null;
+  let bestR=Math.floor(SIZE/2),bestN=-1;
+  for(let r=0;r<SIZE;r++){let n=0;for(let c=0;c<SIZE;c++)if(board[r][c].fr>0)n++;if(n>bestN){bestN=n;bestR=r;}}
+  const seed=[];for(let c=0;c<SIZE;c++)seed.push({r:bestR,c});
+  const clearSet=expandClear(seed);
+  flashToast("📈 Памп: ряд очищен","");sfx("shuffle",.45);
+  render(new Map([...clearSet].map(k=>[k,["match"]])));
+  await wait(STEP);
+  let bi=0;clearSet.forEach(k=>{const[r,c]=k.split("-").map(Number);if(board[r][c].fr>0)bi++;});
+  if(bi>0)addIceBroken(bi);
+  clearSet.forEach(k=>{const[r,c]=k.split("-").map(Number);board[r][c].id=null;board[r][c].fr=0;board[r][c].sp=null;board[r][c].vol=0;});
+  collapse();refill();render();sfx("drop",.28);
+  addEndless(clearSet.size*40,1);
+  await wait(STEP);
+  await cascade();
+  busy=false;updatePuUI();
+}
+/* volatility bombs: countdown each player move; reaching 0 ices the area & costs time */
+function volCells(){const a=[];for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(board[r][c].vol>0)a.push({r,c});return a;}
+function spawnVolBomb(turns){
+  const cand=[];for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){const t=board[r][c];if(!t.fr&&!t.sp&&!t.vol&&t.id!=null)cand.push({r,c});}
+  if(!cand.length)return;const p=cand[Math.floor(Math.random()*cand.length)];board[p.r][p.c].vol=turns||5;
+}
+function tickVolBombs(){
+  const cells=volCells();if(!cells.length)return;let exploded=false;
+  cells.forEach(({r,c})=>{board[r][c].vol--;
+    if(board[r][c].vol<=0){board[r][c].vol=0;exploded=true;
+      [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{const nr=r+dr,nc=c+dc;
+        if(nr>=0&&nc>=0&&nr<SIZE&&nc<SIZE&&!board[nr][nc].sp)board[nr][nc].fr=2;});}});
+  if(exploded){etime=Math.max(0,etime-3);updateEndlessBar();sfx("bad",.5);
+    flashToast("📉 Волатильность! Лёд и −3 c","");
+    setMascot("bad",{eye:"Просадка",title:"Волатильность!",text:"Бомба сработала: район заморожен, время потеряно. Гасите такие бомбы быстрее — матчем по их монете или взрывом."});}
+}
+function bearMarket(){
+  let added=0;const want=3+Math.floor(wave/3);
+  const cand=[];for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){const t=board[r][c];if(!t.fr&&!t.sp&&t.id!=null)cand.push({r,c});}
+  for(let i=cand.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cand[i],cand[j]]=[cand[j],cand[i]];}
+  for(let i=0;i<cand.length&&added<want;i++){board[cand[i].r][cand[i].c].fr=2;added++;}
+  sfx("bad",.45);flashToast("🐻 Медвежий рынок: рынок засыпает льдом","");
+  setMascot("detective",{eye:"Медвежий рынок",title:"🐻 Похолодание",text:"Рынок падает — добавилось льда. Разбивайте его комбинациями рядом или Пампом."});
+}
+/* ===== pause & rules card ===== */
+function openPause(){if(!endless||gameover||paused)return;paused=true;stopTimer();updatePuUI();pauseModal.classList.add("open");}
+function closePause(){if(!paused)return;paused=false;pauseModal.classList.remove("open");updatePuUI();if(endless&&!gameover)startTimer();}
+function rulesSeen(){try{return localStorage.getItem("cm_rules")==="1";}catch(e){return false;}}
+function markRulesSeen(){try{localStorage.setItem("cm_rules","1");}catch(e){}}
+function showRules(){if(rulesModal)rulesModal.classList.add("open");}
+function startEndless(){
+  if(!rulesSeen()&&rulesModal){showRules();return;}
+  reallyStartEndless();
+}
+function restartEndless(){overModal.classList.remove("open");reallyStartEndless();}
+
 
 const wait=d=>new Promise(r=>setTimeout(r,d));
 
@@ -1072,6 +1308,19 @@ function init(){
   recClose.addEventListener("click",closeRecords);
   overBtn.addEventListener("click",restartEndless);
   overSave.addEventListener("click",submitWithName);
+  if(puPump)puPump.addEventListener("click",usePump);
+  if(puStable)puStable.addEventListener("click",useStable);
+  if(puAir)puAir.addEventListener("click",useAir);
+  if(soundBtn)soundBtn.addEventListener("click",()=>setSound(!soundOn));
+  if(pauseSound)pauseSound.addEventListener("click",()=>setSound(!soundOn));
+  if(pauseBtn)pauseBtn.addEventListener("click",openPause);
+  if(pauseResume)pauseResume.addEventListener("click",closePause);
+  if(pauseRestart)pauseRestart.addEventListener("click",()=>{
+    if(typeof confirm!=="function"||confirm("Начать заново? Текущий результат не сохранится.")){pauseModal.classList.remove("open");paused=false;reallyStartEndless();}});
+  if(rulesStart)rulesStart.addEventListener("click",()=>{rulesModal.classList.remove("open");markRulesSeen();reallyStartEndless();});
+  setSound(soundOn);
+  try{window.addEventListener("online",function(){lbFlush();});}catch(e){}
+  try{lbFlush();}catch(e){}
   nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")submitWithName();});
   window.addEventListener("pointermove",onPointerMove,{passive:true});
   window.addEventListener("pointerup",onPointerUp);
