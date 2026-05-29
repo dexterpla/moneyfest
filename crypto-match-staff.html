@@ -746,7 +746,7 @@ function doShuffle(auto){
 /* ===== leaderboard (staff branch) =====
    Онлайн-режим: впишите URL веб-приложения Google Apps Script ниже.
    Пусто => локальная таблица (на этом устройстве). См. README-leaderboard.md */
-const LB_URL="https://script.google.com/macros/s/AKfycbylEUZs0DugHeFWof_hbhEfkf4bPWLu7TD4X3MD-tFiZApGjpR7Jfkvn-Da-p9olSN3/exec";
+const LB_URL="https://script.google.com/macros/s/AKfycbys1dmku9b8e_seZ3Pzl2ri3mmSB4iu0Yqpj-FAePyTbYThq9C7fACwPis9HSq8vwJx/exec";
 function lbGetName(){try{return localStorage.getItem("mf-name")||"";}catch(e){return"";}}
 function lbSetName(n){try{localStorage.setItem("mf-name",n);}catch(e){}}
 function lbLocalAll(){try{return JSON.parse(localStorage.getItem("mf-lb")||"[]");}catch(e){return[];}}
@@ -757,8 +757,12 @@ async function lbSubmit(name,score,wave){
   if(!LB_URL){lbLocalAdd(name,score,wave);return lbLocalTop();}
   const u=LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=add"
     +"&name="+encodeURIComponent(name)+"&score="+encodeURIComponent(score)+"&wave="+encodeURIComponent(wave);
-  try{const r=await fetch(u);const d=await r.json();if(d&&d.scores)return d.scores;throw 0;}
-  catch(e){lbLocalAdd(name,score,wave);return lbLocalTop();}
+  // 1) fire the write so it reaches the server even if the response is blocked by CORS
+  try{await fetch(u,{mode:"no-cors",cache:"no-store"});}catch(e){}
+  // 2) keep a local backup copy regardless
+  lbLocalAdd(name,score,wave);
+  // 3) read the fresh top to show (falls back to local if read is blocked)
+  return lbTop();
 }
 async function lbTop(n){n=n||10;
   if(!LB_URL)return lbLocalTop(n);
