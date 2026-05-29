@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -79,6 +79,13 @@ button,a{font:inherit}
   background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));
   border:1.5px solid rgba(255,255,255,.1);min-width:104px;
 }
+.top-right{display:flex;align-items:center;gap:10px}
+.icon-btn{flex:none;width:42px;height:42px;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;border:2px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.04));
+  color:var(--text);transition:transform .14s ease}
+.icon-btn:hover{transform:translateY(-1px)}
+.icon-btn svg{width:20px;height:20px;display:block}
 .score-box span{display:block;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .score-box strong{display:block;font-family:"Russo One",sans-serif;font-weight:400;font-size:1.7rem;line-height:1.05;color:#fff;font-variant-numeric:tabular-nums}
 
@@ -97,7 +104,7 @@ button,a{font:inherit}
   border:1.5px solid rgba(255,255,255,.07)}
 .board{
   display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);gap:8px;
-  overflow:hidden;
+  overflow:hidden;user-select:none;-webkit-user-select:none;
   width:100%;aspect-ratio:1;padding:12px;border-radius:20px;
   background:linear-gradient(180deg,#0b1c34,#06101f);
   border:2px solid var(--line);
@@ -105,8 +112,8 @@ button,a{font:inherit}
 }
 .tile{
   --c1:#fff;--c2:#ccc;--rim:#999;--sym:#222;
-  position:relative;border:0;padding:0;cursor:pointer;border-radius:50%;
-  background:transparent;-webkit-tap-highlight-color:transparent;
+  position:relative;border:0;padding:0;cursor:grab;border-radius:50%;
+  background:transparent;-webkit-tap-highlight-color:transparent;touch-action:none;
   transition:transform .14s ease,filter .14s ease;
 }
 .coin{
@@ -133,6 +140,9 @@ button,a{font:inherit}
 .tile:active{transform:scale(.97)}
 .tile.sel .coin{box-shadow:0 0 0 4px var(--yellow),0 0 18px rgba(255,196,31,.6),inset 0 -7px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.5)}
 .tile.sel{transform:scale(1.05);z-index:2}
+.tile.drag{z-index:6;cursor:grabbing;will-change:transform}
+.tile.drag .coin{box-shadow:0 0 0 4px var(--yellow),0 12px 22px rgba(0,0,0,.4),0 0 22px rgba(255,196,31,.7),inset 0 -7px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.5)}
+.tile.swap-near .coin{box-shadow:0 0 0 3px rgba(255,196,31,.9),0 0 16px rgba(255,196,31,.55),inset 0 -7px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.55)}
 .tile.match{animation:pop .36s ease forwards}
 .tile.fall{animation:drop .32s cubic-bezier(.16,.84,.3,1.1)}
 .tile.shake{animation:shake .32s ease}
@@ -140,6 +150,10 @@ button,a{font:inherit}
 @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.18);filter:brightness(1.5) saturate(1.3)}100%{transform:scale(.18);opacity:0}}
 @keyframes drop{0%{transform:translateY(-22px) scale(.9);opacity:0}100%{transform:none;opacity:1}}
 @keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-6px)}70%{transform:translateX(6px)}}
+@keyframes hintPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.tile.hint{z-index:3;animation:hintPulse 1.05s ease-in-out infinite}
+.tile.hint .coin{box-shadow:0 0 0 4px var(--yellow),0 0 22px rgba(255,196,31,.75),inset 0 -7px 12px rgba(0,0,0,.3),inset 0 4px 8px rgba(255,255,255,.5)}
+.goal.tut-hidden{display:none}
 
 /* ---------- status / controls ---------- */
 .controls{display:flex;align-items:center;gap:12px;margin-top:14px}
@@ -244,6 +258,45 @@ body.dock-pad{padding-bottom:150px}
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms!important;transition-duration:.08s!important}
 }
+
+/* ===== MoneyFest light theme ===== */
+[data-theme="light"]{
+  --text:#0d2240; --muted:#5b6b86; --ink:#0c1f3a; --line:#16335c;
+  --panel:#ffffff; --panel-2:#f4f8fe;
+  --shadow:0 18px 40px rgba(20,49,92,.18);
+  --card-shadow:0 2px 0 rgba(20,49,92,.22),0 14px 26px rgba(20,49,92,.14);
+}
+[data-theme="light"] body{
+  background:
+    radial-gradient(1100px 700px at 14% -8%, rgba(255,196,31,.30), transparent 60%),
+    radial-gradient(1000px 700px at 92% 6%, rgba(31,182,176,.22), transparent 60%),
+    radial-gradient(900px 800px at 50% 116%, rgba(47,155,255,.14), transparent 60%),
+    linear-gradient(180deg,#eef3fb,#e6edf8 58%,#eef3fb);
+  background-attachment:fixed;
+}
+[data-theme="light"] body::before{
+  background-image:
+    linear-gradient(rgba(20,49,92,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(20,49,92,.05) 1px,transparent 1px);
+  opacity:.6;
+}
+[data-theme="light"] .panel,[data-theme="light"] .modal-card{background:linear-gradient(180deg,#ffffff,#f4f8fe)}
+[data-theme="light"] .panel::before{background:radial-gradient(120% 60% at 50% -10%,rgba(20,49,92,.05),transparent 55%)}
+[data-theme="light"] .icon-btn{background:linear-gradient(180deg,rgba(20,49,92,.07),rgba(20,49,92,.02))}
+[data-theme="light"] .brand-text .eyebrow,[data-theme="light"] .modal-card .b-eye{color:var(--teal-d)}
+[data-theme="light"] .score-box{background:linear-gradient(180deg,rgba(20,49,92,.06),rgba(20,49,92,.02));border-color:rgba(20,49,92,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+[data-theme="light"] .score-box strong{color:var(--ink)}
+[data-theme="light"] .goal-track{background:#dde6f3;border-color:rgba(20,49,92,.18)}
+[data-theme="light"] .goal-meta b{color:#c77f00}
+[data-theme="light"] .board-wrap{background:linear-gradient(180deg,rgba(20,49,92,.05),rgba(20,49,92,.02));border-color:rgba(20,49,92,.1)}
+[data-theme="light"] .board{background:linear-gradient(180deg,#e9f0fb,#d9e4f4);border-color:var(--line);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6),inset 0 -18px 34px rgba(20,49,92,.12)}
+[data-theme="light"] .status{background:rgba(20,49,92,.05);border-color:rgba(20,49,92,.1);color:var(--ink)}
+[data-theme="light"] .btn-ghost{background:rgba(20,49,92,.08);color:var(--ink)}
+[data-theme="light"] .hint-row{color:var(--muted)}
+[data-theme="light"] .mascot.docked{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(244,248,254,.98));
+  border-top-color:var(--line);box-shadow:0 -14px 30px rgba(20,49,92,.16)}
+[data-theme="light"] .modal{background:rgba(20,40,70,.5)}
 </style>
 </head>
 <body>
@@ -257,15 +310,18 @@ body.dock-pad{padding-bottom:150px}
           <h1>Crypto Match</h1>
         </div>
       </div>
-      <div class="score-box">
-        <span>Очки</span>
-        <strong id="score">0</strong>
+      <div class="top-right">
+        <button id="themeBtn" class="icon-btn" type="button" aria-label="Переключить тему"></button>
+        <div class="score-box">
+          <span>Очки</span>
+          <strong id="score">0</strong>
+        </div>
       </div>
     </header>
 
-    <div class="goal">
+    <div class="goal" id="goal">
       <div class="goal-track"><div class="goal-fill" id="goalFill"></div></div>
-      <div class="goal-meta"><span>Прогресс до подарка</span><span><b id="scoreMini">0</b> / 2990</span></div>
+      <div class="goal-meta"><span id="goalLabel">Прогресс до подарка</span><span><b id="scoreMini">0</b> / 2990</span></div>
     </div>
 
     <div class="board-wrap">
@@ -273,10 +329,10 @@ body.dock-pad{padding-bottom:150px}
     </div>
 
     <div class="controls">
-      <p id="message" class="status">Собирайте 3+ одинаковые монеты в ряд — маскот расскажет о валютах.</p>
+      <p id="message" class="status">Перетаскивайте монеты, собирайте 3+ в ряд — маскот расскажет о валютах.</p>
       <button id="shuffleBtn" class="btn btn-ghost" type="button">Перемешать</button>
     </div>
-    <p class="hint-row">Нажмите две соседние монеты, чтобы поменять их местами</p>
+    <p class="hint-row">Перетащите монету на соседнюю, чтобы поменять их местами</p>
   </section>
 </main>
 
@@ -285,7 +341,7 @@ body.dock-pad{padding-bottom:150px}
   <div class="bubble" id="bubble">
     <p class="b-eye" id="bubbleEye">Подсказка</p>
     <h2><span id="factTitle">MoneyFest</span></h2>
-    <p id="factText">Привет! Я Манифестик — собирай монеты, а я подскажу, чем они интересны.</p>
+    <p id="factText">Я Манифестик, твой помощник в мире криптовалют от MoneyFest. Собирайте монеты в ряд — расскажу о каждой валюте.</p>
     <div class="dots" id="dots"></div>
   </div>
 </div>
@@ -296,7 +352,7 @@ body.dock-pad{padding-bottom:150px}
     <p class="b-eye">Подарок открыт</p>
     <h2 id="rewardTitle">Демо-доступ к курсу криптоинвестиций</h2>
     <p>Вы набрали 2990 очков и открыли подарок от MoneyFest. Заберите его по кнопке ниже.</p>
-    <a class="btn btn-primary" href="https://getcourse.ru/" target="_blank" rel="noreferrer">Перейти в GetCourse</a>
+    <a class="btn btn-primary" href="https://getcourse.ru/" target="_blank" rel="noreferrer">Получить подарок</a>
   </div>
 </div>
 
@@ -313,12 +369,13 @@ const ART={
 /* ===== dom ===== */
 const boardEl=document.getElementById("board"),scoreEl=document.getElementById("score"),
   scoreMini=document.getElementById("scoreMini"),goalFill=document.getElementById("goalFill"),
+  goalEl=document.getElementById("goal"),goalLabel=document.getElementById("goalLabel"),
   msgEl=document.getElementById("message"),shuffleBtn=document.getElementById("shuffleBtn"),
   mascotEl=document.getElementById("mascot"),mascotImg=document.getElementById("mascotImg"),
   bubbleEl=document.getElementById("bubble"),bubbleEye=document.getElementById("bubbleEye"),
   factTitle=document.getElementById("factTitle"),factText=document.getElementById("factText"),
   dotsEl=document.getElementById("dots"),rewardModal=document.getElementById("rewardModal"),
-  rewardImg=document.getElementById("rewardImg");
+  rewardImg=document.getElementById("rewardImg"),themeBtn=document.getElementById("themeBtn");
 
 /* ===== config ===== */
 const SIZE=6,GOAL=2990,STEP=270;
@@ -358,6 +415,14 @@ function shade(hex,amt){ // amt>0 lighten toward white, amt<0 darken toward blac
 let board=[],score=0,sel=null,busy=false,rewardShown=false,fall=new Set();
 const factIdx={BTC:0,ETH:0,SOL:0,TON:0};
 let placeFlip=0;
+let tutorial=false,tutStep=0,tutHint=null,tutMatched=false,introT=0;
+const GREETING="Я Манифестик, твой помощник в мире криптовалют от MoneyFest. Собирайте монеты в ряд — расскажу о каждой валюте.";
+const TUT_TEXT={
+  BTC:"Сложите 3 биткоина (\u20BF) в один ряд. Bitcoin — первая криптовалюта и главный ориентир всего рынка.",
+  ETH:"Теперь соберите 3 Ethereum (\u039E). На нём работают смарт-контракты: приложения, NFT и DeFi.",
+  SOL:"Соберите 3 Solana (\u25CE). Solana ценят за высокую скорость и низкие комиссии.",
+  TON:"И последняя — соберите 3 TON (\u25C8). TON тесно связана с экосистемой Telegram."
+};
 
 /* ===== audio ===== */
 const pool={};
@@ -387,7 +452,7 @@ function coinHint(id,advance){
 }
 /* tap mascot -> next fact of last coin */
 let lastCoin="BTC";
-bubbleEl.addEventListener("click",()=>{coinHint(lastCoin,true);});
+bubbleEl.addEventListener("click",()=>{if(tutorial)return;coinHint(lastCoin,true);});
 
 /* place float in side gutters; validate against the board rect; dock if it can't fit */
 function clearAnchor(){mascotEl.style.left=mascotEl.style.right=mascotEl.style.top=mascotEl.style.bottom="";}
@@ -400,7 +465,8 @@ function floatMode(){mascotEl.classList.remove("docked","desk");document.body.cl
 function overlaps(a,b,m){return !(a.right+m<b.left||a.left-m>b.right||a.bottom+m<b.top||a.top-m>b.bottom);}
 
 function placeMascot(){
-  if(rewardShown){mascotEl.style.opacity="0";return;}
+  if(rewardShown){mascotEl.style.opacity="1";dock(false);mascotEl.style.zIndex="70";return;}
+  mascotEl.style.zIndex="";
   mascotEl.style.opacity="1";
   if(window.matchMedia("(max-width:680px)").matches){dock(false);return;}
   floatMode();
@@ -461,16 +527,72 @@ function render(extra){
     if(sel&&sel.r===r&&sel.c===c)b.classList.add("sel");
     if(fall.has(key))b.classList.add("fall");
     const cl=extra.get(key);if(cl)cl.forEach(x=>b.classList.add(x));
-    b.addEventListener("click",()=>tap(r,c));
+    if(tutorial&&tutHint&&!(cl&&cl.indexOf("match")>=0)&&((tutHint.a.r===r&&tutHint.a.c===c)||(tutHint.b.r===r&&tutHint.b.c===c)))b.classList.add("hint");
+    b.addEventListener("pointerdown",(e)=>onTileDown(e,r,c));
     boardEl.appendChild(b);
   }
   fall.clear();
 }
 
 /* ===== interaction ===== */
+/* primary: drag a coin onto a neighbour to swap; tap-to-select kept as fallback */
+let drag=null;
+function cellSize(){const w=boardEl.getBoundingClientRect().width;return w?w/SIZE:48;}
+function isHintTile(r,c){return !!tutHint&&((tutHint.a.r===r&&tutHint.a.c===c)||(tutHint.b.r===r&&tutHint.b.c===c));}
+function isHintMove(a,b){return !!tutHint&&(((a.r===tutHint.a.r&&a.c===tutHint.a.c)&&(b.r===tutHint.b.r&&b.c===tutHint.b.c))||((a.r===tutHint.b.r&&a.c===tutHint.b.c)&&(b.r===tutHint.a.r&&b.c===tutHint.a.c)));}
+function trySwap(a,b){
+  if(busy||rewardShown)return;
+  if(tutorial&&!isHintMove(a,b))return;            // scripted: only the highlighted swap is allowed
+  if(b.r<0||b.c<0||b.r>=SIZE||b.c>=SIZE)return;
+  if(Math.abs(a.r-b.r)+Math.abs(a.c-b.c)!==1)return;
+  sel=null;resolve(a,b);
+}
+function tileAt(r,c){return boardEl.querySelector('[data-r="'+r+'"][data-c="'+c+'"]');}
+function clearNeighbor(d){if(d&&d.nEl){d.nEl.classList.remove("swap-near");d.nEl.style.transition="";d.nEl.style.transform="";d.nEl=null;}}
+function springBack(el){if(el){el.style.transition="transform .2s cubic-bezier(.2,.9,.2,1.3)";el.style.transform="";}}
+function dirNeighbor(d){let nr=d.r,nc=d.c;if(d.horiz)nc+=d.dx>0?1:-1;else nr+=d.dy>0?1:-1;
+  return (nr>=0&&nc>=0&&nr<SIZE&&nc<SIZE)?{nr,nc}:null;}
+function onTileDown(e,r,c){
+  if(busy||rewardShown)return;
+  if(tutorial&&!isHintTile(r,c)){msgEl.textContent="Сейчас можно двигать только подсвеченную монету.";return;} // scripted lock
+  drag={r,c,x:e.clientX,y:e.clientY,el:e.currentTarget,nEl:null,moved:false,dx:0,dy:0,horiz:true};
+  if(drag.el){drag.el.classList.add("drag");drag.el.style.transition="none";}
+}
+function onPointerMove(e){
+  if(!drag)return;
+  const dx=e.clientX-drag.x, dy=e.clientY-drag.y, cs=cellSize();
+  drag.dx=dx;drag.dy=dy;
+  if(Math.abs(dx)>3||Math.abs(dy)>3)drag.moved=true;
+  drag.horiz=Math.abs(dx)>=Math.abs(dy);
+  const nb=dirNeighbor(drag);
+  // the DRAGGED coin follows the pointer (only toward a valid neighbour); nothing else moves
+  let tx=0,ty=0;
+  if(nb){if(drag.horiz)tx=Math.max(-cs,Math.min(cs,dx));else ty=Math.max(-cs,Math.min(cs,dy));}
+  if(drag.el)drag.el.style.transform=`translate(${tx}px,${ty}px) scale(1.13)`;
+  // the target neighbour only highlights (stays in place)
+  const nEl=nb?tileAt(nb.nr,nb.nc):null;
+  if(drag.nEl&&drag.nEl!==nEl)clearNeighbor(drag);
+  if(nEl){drag.nEl=nEl;nEl.classList.add("swap-near");}
+}
+function onPointerUp(){
+  if(!drag)return;const d=drag;drag=null;
+  if(d.el)d.el.classList.remove("drag");
+  clearNeighbor(d);springBack(d.el);
+  const cs=cellSize(),th=Math.max(16,cs*0.5),amt=d.horiz?Math.abs(d.dx):Math.abs(d.dy),nb=dirNeighbor(d);
+  if(d.moved&&amt>=th&&nb){trySwap({r:d.r,c:d.c},{r:nb.nr,c:nb.nc});}
+  else if(!d.moved){tap(d.r,d.c);}
+}
+function onPointerCancel(){if(!drag)return;const d=drag;drag=null;if(d.el)d.el.classList.remove("drag");springBack(d.el);clearNeighbor(d);}
+
 function tap(r,c){
   maybeReward();if(busy||rewardShown)return;const cur={r,c};
-  if(!sel){sel=cur;sfx("tap",.4);render();msgEl.textContent="Монета выбрана. Теперь выберите соседнюю.";return;}
+  if(tutorial){
+    if(!isHintTile(r,c)){msgEl.textContent="Сейчас можно двигать только подсвеченную монету.";return;}
+    if(!sel){sel=cur;sfx("tap",.4);renderTut();return;}
+    if(sel.r===r&&sel.c===c){sel=null;renderTut();return;}
+    trySwap(sel,cur);return; // trySwap commits only if it's the highlighted pair
+  }
+  if(!sel){sel=cur;sfx("tap",.4);render();msgEl.textContent="Монета выбрана. Перетащите её на соседнюю или коснитесь соседней.";return;}
   if(sel.r===r&&sel.c===c){sel=null;sfx("tap",.4);render();msgEl.textContent="Выбор снят.";return;}
   if(Math.abs(sel.r-r)+Math.abs(sel.c-c)!==1){sel=cur;sfx("tap",.4);render();msgEl.textContent="Менять можно только соседние монеты.";return;}
   resolve(sel,cur);
@@ -480,11 +602,18 @@ async function resolve(a,b){
   if(!findMatches().length){
     await wait(STEP);swap(a,b);
     render(new Map([[a.r+"-"+a.c,["shake"]],[b.r+"-"+b.c,["shake"]]]));
-    sfx("bad",.45);msgEl.textContent="Не сложилось — попробуйте другой ход.";
-    setMascot(Math.random()<.5?"shrug":"bad",{eye:"Упс",title:"Почти!",text:"Тут комбинация не вышла. Поищите три монеты подряд."});
+    sfx("bad",.45);
+    if(tutorial){msgEl.textContent="Так ряд не собрать. Перетащите подсвеченную монету на соседнюю.";setTimeout(()=>{if(tutorial)renderTut();},360);}
+    else{msgEl.textContent="Не сложилось — попробуйте другой ход.";
+      setMascot(Math.random()<.5?"shrug":"bad",{eye:"Упс",title:"Почти!",text:"Тут комбинация не вышла. Поищите три монеты подряд."});}
     busy=false;return;
   }
-  await cascade();busy=false;
+  await cascade();
+  if(tutorial){
+    if(tutMatched){tutStep++;if(tutStep>=COINS.length)endTutorial();else setupTutStep();}
+    else{setupTutStep();msgEl.textContent=`Нужно собрать именно ${COINS[tutStep].id}. Перетащите подсвеченную монету.`;}
+  }
+  busy=false;
 }
 function findMatches(){
   const m=new Set();
@@ -497,29 +626,30 @@ async function cascade(){
   while(matches.length){
     chain++;
     const id=board[matches[0].r][matches[0].c].id;lastCoin=id;
+    if(tutorial){if(matches.some(m=>board[m.r][m.c].id===COINS[tutStep].id))tutMatched=true;}
     render(new Map(matches.map(m=>[m.r+"-"+m.c,["match"]])));
     sfx("match",Math.min(.46+(chain-1)*.05,.62));
-    if(chain===1)coinHint(id,false);
+    if(chain===1&&!tutorial)coinHint(id,false);
     await wait(STEP);
     matches.forEach(m=>board[m.r][m.c].id=null);
     collapse();refill();render();sfx("drop",.28);
-    addScore(matches.length*100+(chain-1)*70);
+    addScore(matches.length*50+(chain-1)*35);
     await wait(STEP);
     matches=rewardShown?[]:findMatches();
   }
-  if(!rewardShown&&!hasMove()){doShuffle(true);}
+  if(!tutorial&&!rewardShown&&!hasMove()){doShuffle(true);}
 }
 function collapse(){for(let c=0;c<SIZE;c++){const keep=[];for(let r=SIZE-1;r>=0;r--)if(board[r][c].id)keep.push(board[r][c].id);for(let r=SIZE-1;r>=0;r--)board[r][c].id=keep[SIZE-1-r]||null;}}
 function refill(){for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(!board[r][c].id){board[r][c].id=randId();fall.add(r+"-"+c);}}
 
-function addScore(g){score+=g;scoreEl.textContent=score;scoreMini.textContent=Math.min(score,GOAL);
-  goalFill.style.right=Math.max(0,100-Math.min(100,score/GOAL*100))+"%";maybeReward();}
+function updateScoreUI(){scoreEl.textContent=score;scoreMini.textContent=Math.min(score,GOAL);
+  goalFill.style.right=Math.max(0,100-Math.min(100,score/GOAL*100))+"%";}
+function addScore(g){if(tutorial)return;score+=g;updateScoreUI();maybeReward();}
 
 function maybeReward(){
   if(rewardShown||score<GOAL)return;rewardShown=true;busy=true;sel=null;sfx("reward",.6);
   rewardImg.src=ART.reward;rewardModal.classList.add("open");
-  setMascot("reward",{eye:"Цель достигнута",title:"Подарок!",text:"Вы открыли демо-доступ к курсу криптоинвестиций."});
-  mascotEl.style.opacity="0";
+  setMascot("good",{eye:"Поздравляю!",title:"Вы получили подарок!",text:"Вам открыт демо-доступ к курсу криптоинвестиций на 2 часа. Начните прямо сейчас: узнаете о других монетах и освоите базу для успешного заработка!"});
   msgEl.textContent="Цель достигнута — подарок открыт!";
 }
 
@@ -540,13 +670,91 @@ const wait=d=>new Promise(r=>setTimeout(r,d));
 function sizeBoard(){if(window.CSS&&CSS.supports&&CSS.supports("aspect-ratio","1"))return;const w=boardEl.clientWidth;if(w)boardEl.style.height=w+"px";}
 window.addEventListener("resize",sizeBoard);
 
+/* ===== tutorial ===== */
+function findCoinMoveHint(coinId){
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const pairs=[];
+    if(c+1<SIZE)pairs.push([{r,c},{r,c:c+1}]);
+    if(r+1<SIZE)pairs.push([{r,c},{r:r+1,c}]);
+    for(const [a,b] of pairs){
+      swap(a,b);
+      const hit=findMatches().some(m=>board[m.r][m.c].id===coinId);
+      swap(a,b);
+      if(hit)return{a,b};
+    }
+  }
+  return null;
+}
+function arrangeForTarget(coinId){
+  for(let t=0;t<260;t++){
+    if(t<180){const ids=board.flat().map(x=>x.id);
+      for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}
+      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)board[r][c].id=ids[r*SIZE+c];
+    }else{build();}
+    if(!findMatches().length){const h=findCoinMoveHint(coinId);if(h)return h;}
+  }
+  return findCoinMoveHint(coinId)||{a:{r:0,c:0},b:{r:0,c:1}};
+}
+function renderTut(){
+  if(!tutHint){render();return;}
+  render(new Map([[tutHint.a.r+"-"+tutHint.a.c,["hint"]],[tutHint.b.r+"-"+tutHint.b.c,["hint"]]]));
+}
+function startTutorial(){
+  tutorial=true;tutStep=0;score=0;updateScoreUI();
+  goalEl.classList.add("tut-hidden");
+  shuffleBtn.textContent="Пропустить";
+  setupTutStep();
+  // greet first (board is already locked to the highlighted move), then reveal the step instruction
+  setMascot("idle",{eye:"Привет!",title:"Манифестик",text:GREETING});
+  msgEl.textContent="Перетащите подсвеченную монету на соседнюю.";
+  clearTimeout(introT);introT=setTimeout(()=>{if(tutorial&&tutStep===0&&!tutMatched)showStepText();},3000);
+}
+function showStepText(){
+  const coin=COINS[tutStep];
+  setMascot(coin.pose,{eye:`Обучение · шаг ${tutStep+1}/4`,title:coin.id,chip:coin.sym,text:TUT_TEXT[coin.id]});
+  msgEl.textContent="Перетащите подсвеченную монету на соседнюю, чтобы собрать ряд.";
+}
+function setupTutStep(){
+  const coin=COINS[tutStep];lastCoin=coin.id;tutMatched=false;
+  tutHint=arrangeForTarget(coin.id);sel=null;renderTut();
+  showStepText();
+}
+function endTutorial(){
+  clearTimeout(introT);
+  tutorial=false;tutHint=null;sel=null;
+  goalEl.classList.remove("tut-hidden");
+  shuffleBtn.textContent="Перемешать";
+  score=0;updateScoreUI();render();
+  if(!hasMove())doShuffle(true);
+  setMascot("good",{eye:"Обучение пройдено",title:"Готово!",text:"А теперь собери 2990 очков, чтобы получить эксклюзивный подарок от Онлайн-школы MoneyFest."});
+  msgEl.textContent="Собирайте комбинации и набирайте 2990 очков.";
+}
+
+/* ===== theme (MoneyFest light / dark) ===== */
+const ICON_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.5 1.5M17.9 17.9l1.5 1.5M2.5 12h2M19.5 12h2M4.6 19.4l1.5-1.5M17.9 6.1l1.5-1.5"/></svg>';
+const ICON_MOON='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/></svg>';
+function applyTheme(t){document.documentElement.dataset.theme=t;if(themeBtn)themeBtn.innerHTML=(t==="light")?ICON_MOON:ICON_SUN;}
+function initTheme(){
+  let t="light";try{t=localStorage.getItem("mf-theme")||"light";}catch(e){}
+  applyTheme(t);
+  themeBtn.addEventListener("click",()=>{
+    const n=document.documentElement.dataset.theme==="light"?"dark":"light";
+    applyTheme(n);try{localStorage.setItem("mf-theme",n);}catch(e){}
+    placeMascot();
+  });
+}
+
 /* ===== init ===== */
 function init(){
   primeAudio();
+  initTheme();
   build();render();sizeBoard();
   window.addEventListener("load",sizeBoard);
-  setMascot("idle",{eye:"Привет!",title:"Манифестик на связи",text:"Я Манифестик, маскот MoneyFest. Собирайте монеты в ряд — расскажу о каждой валюте."});
-  shuffleBtn.addEventListener("click",()=>doShuffle(false));
+  startTutorial();
+  shuffleBtn.addEventListener("click",()=>{if(tutorial){if(!busy)endTutorial();}else doShuffle(false);});
+  window.addEventListener("pointermove",onPointerMove,{passive:true});
+  window.addEventListener("pointerup",onPointerUp);
+  window.addEventListener("pointercancel",onPointerCancel);
   // first user gesture unlocks audio
   document.addEventListener("pointerdown",function once(){const C=window.AudioContext||window.webkitAudioContext;if(C){actx=actx||new C();if(actx.state==="suspended")actx.resume();}document.removeEventListener("pointerdown",once);},{once:true});
 }
