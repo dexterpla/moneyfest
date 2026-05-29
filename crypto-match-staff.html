@@ -174,6 +174,26 @@ button,a{font:inherit}
 .lb-row.me{border-color:var(--yellow);background:rgba(255,196,31,.16)}
 .lb-row.top1 .lb-rank{color:var(--yellow)}
 .lb-empty{opacity:.7;padding:10px;text-align:center}
+.rec-personal{font-family:"Russo One";font-size:1rem;margin:2px 0 8px}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:8px}
+.badge{padding:10px 8px;border-radius:14px;text-align:center;border:1.5px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);opacity:.45;filter:grayscale(.7)}
+[data-theme="light"] .badge{background:rgba(20,49,92,.05);border-color:rgba(20,49,92,.1)}
+.badge.on{opacity:1;filter:none;border-color:var(--yellow);background:rgba(255,196,31,.14)}
+.badge-ic{font-size:1.5rem;line-height:1}
+.badge-nm{font-family:"Russo One";font-size:.72rem;margin-top:3px}
+.badge-ds{font-size:.66rem;opacity:.7;margin-top:2px;line-height:1.15}
+.record-toast{position:fixed;left:50%;top:18%;transform:translate(-50%,-12px) scale(.9);z-index:90;
+  pointer-events:none;opacity:0;transition:opacity .25s ease,transform .25s ease;
+  font-family:"Russo One";font-size:1.05rem;color:var(--navy-0,#0a1830);
+  background:linear-gradient(180deg,var(--yellow),var(--yellow-d));
+  padding:12px 20px;border-radius:18px;border:3px solid #fff;
+  box-shadow:0 14px 34px rgba(0,0,0,.35);text-align:center;max-width:88vw}
+.record-toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.record-toast.top{background:linear-gradient(180deg,#ffd84d,#ff8a3c)}
+.record-toast.ach{background:linear-gradient(180deg,var(--teal),var(--teal-d));color:#fff;border-color:#eafffb}
+.over-record{font-family:"Russo One";color:var(--yellow);margin:2px 0 6px}
+[data-theme="light"] .over-record{color:#c77f00}
 .tile.match{animation:pop .36s ease forwards}
 .tile.fall{animation:drop .32s cubic-bezier(.16,.84,.3,1.1)}
 .tile.shake{animation:shake .32s ease}
@@ -357,7 +377,7 @@ body.dock-pad{padding-bottom:150px}
 
     <div class="goal endless-hud" id="endlessHud" style="display:none">
       <div class="goal-track"><div class="goal-fill" id="timeFill"></div></div>
-      <div class="goal-meta"><span id="waveLabel">Волна 1</span><span>⏱ <b id="timeLabel">28</b> с</span></div>
+      <div class="goal-meta"><span id="waveLabel">Волна 1</span><span id="bestLabel">Рекорд 0</span><span>⏱ <b id="timeLabel">28</b> с</span></div>
     </div>
 
     <div class="board-wrap">
@@ -367,6 +387,7 @@ body.dock-pad{padding-bottom:150px}
     <div class="controls">
       <p id="message" class="status">Перетаскивайте монеты, собирайте 3+ в ряд — маскот расскажет о валютах.</p>
       <button id="shuffleBtn" class="btn btn-ghost" type="button">Перемешать</button>
+      <button id="recordsBtn" class="btn btn-ghost" type="button" style="display:none">🏆 Рекорды</button>
     </div>
     <p class="hint-row">Перетащите монету на соседнюю, чтобы поменять их местами</p>
     <button id="directEndlessBtn" class="btn btn-ghost staff-cta" type="button" style="display:none">🚀 Сразу в бесконечный режим</button>
@@ -399,6 +420,7 @@ body.dock-pad{padding-bottom:150px}
     <p class="b-eye">Время вышло</p>
     <h2>Режим трейдера</h2>
     <p>Очки: <b id="overScore">0</b> · Волна <b id="overWave">1</b></p>
+    <p id="overRecord" class="over-record" style="display:none">🎉 Новый личный рекорд!</p>
     <div id="nameRow" class="name-row" style="display:none">
       <input id="nameInput" type="text" maxlength="18" placeholder="Ваше имя для таблицы" autocomplete="off">
       <button id="overSave" class="btn btn-primary" type="button">Сохранить результат</button>
@@ -410,6 +432,20 @@ body.dock-pad{padding-bottom:150px}
     <button id="overBtn" class="btn btn-ghost" type="button">Играть заново</button>
   </div>
 </div>
+
+<div id="recordsModal" class="modal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <p class="b-eye">🏆 Рекорды</p>
+    <p id="recPersonal" class="rec-personal">Личный рекорд: 0</p>
+    <div class="lb-title">🏅 Достижения</div>
+    <div id="badgeGrid" class="badge-grid"></div>
+    <div class="lb-title">🏆 Таблица лидеров</div>
+    <div id="recList" class="lb-list"></div>
+    <button id="recClose" class="btn btn-primary" type="button">Играть</button>
+  </div>
+</div>
+
+<div id="recordToast" class="record-toast" aria-live="polite"></div>
 
 <script>
 /* ===== assets ===== */
@@ -437,7 +473,12 @@ const boardEl=document.getElementById("board"),scoreEl=document.getElementById("
   overWave=document.getElementById("overWave"),overBtn=document.getElementById("overBtn"),
   endlessBtn=document.getElementById("endlessBtn"),nameRow=document.getElementById("nameRow"),
   nameInput=document.getElementById("nameInput"),overSave=document.getElementById("overSave"),
-  lbList=document.getElementById("lbList"),directEndlessBtn=document.getElementById("directEndlessBtn");
+  lbList=document.getElementById("lbList"),directEndlessBtn=document.getElementById("directEndlessBtn"),
+  bestLabel=document.getElementById("bestLabel"),recordsBtn=document.getElementById("recordsBtn"),
+  recordsModal=document.getElementById("recordsModal"),recPersonal=document.getElementById("recPersonal"),
+  badgeGrid=document.getElementById("badgeGrid"),recList=document.getElementById("recList"),
+  recClose=document.getElementById("recClose"),recordToast=document.getElementById("recordToast"),
+  overRecord=document.getElementById("overRecord");
 
 /* ===== config ===== */
 const SIZE=6,GOAL=2990,STEP=270;
@@ -779,9 +820,10 @@ async function lbTop(n){n=n||10;
     const d=await r.json();const s=(d&&d.scores)||(Array.isArray(d)?d:[]);return s.length?s:lbLocalTop(n);}
   catch(e){return lbLocalTop(n);}
 }
-function renderLeaderboard(list,myName){
-  lbList.innerHTML="";
-  if(!list||!list.length){lbList.innerHTML='<div class="lb-empty">Пока нет результатов — будьте первым!</div>';return;}
+function renderLeaderboard(list,myName,target){
+  const box=target||lbList;
+  box.innerHTML="";
+  if(!list||!list.length){box.innerHTML='<div class="lb-empty">Пока нет результатов — будьте первым!</div>';return;}
   const myKey=String(myName||"").trim().toLowerCase();let marked=false;
   list.forEach((e,i)=>{
     const row=document.createElement("div");row.className="lb-row"+(i===0?" top1":"");
@@ -794,12 +836,61 @@ function renderLeaderboard(list,myName){
     meta.textContent=bits.join(" · ");
     main.appendChild(nm);if(bits.length)main.appendChild(meta);
     const sc=document.createElement("span");sc.className="lb-score";sc.textContent=e.score;
-    row.appendChild(rk);row.appendChild(main);row.appendChild(sc);lbList.appendChild(row);
+    row.appendChild(rk);row.appendChild(main);row.appendChild(sc);box.appendChild(row);
   });
 }
 
+/* ===== personal record, achievements, toasts ===== */
+function lbGetBest(){try{return Number(localStorage.getItem("mf-best")||0)||0;}catch(e){return 0;}}
+function lbSetBest(v){try{localStorage.setItem("mf-best",String(v));}catch(e){}}
+const ACH=[
+  {id:"wave5",icon:"🌊",name:"Волна 5",desc:"Дойти до 5-й волны"},
+  {id:"wave10",icon:"🌊",name:"Волна 10",desc:"Дойти до 10-й волны"},
+  {id:"score10k",icon:"💰",name:"10 000",desc:"Набрать 10 000 за игру"},
+  {id:"ice20",icon:"❄️",name:"Ледоруб",desc:"Разбить 20 льдов"},
+  {id:"combo4",icon:"⚡",name:"Комбо x4",desc:"Собрать комбо x4"}
+];
+function achAll(){try{return JSON.parse(localStorage.getItem("mf-ach")||"[]");}catch(e){return[];}}
+function achHas(id){return achAll().indexOf(id)>=0;}
+function achUnlock(id){if(achHas(id))return;const a=achAll();a.push(id);try{localStorage.setItem("mf-ach",JSON.stringify(a));}catch(e){}
+  const d=ACH.find(x=>x.id===id);if(d)flashToast(d.icon+" Достижение: "+d.name,"ach");}
+function addIceBroken(n){let t=0;try{t=Number(localStorage.getItem("mf-ice")||0)||0;}catch(e){}t+=n;
+  try{localStorage.setItem("mf-ice",String(t));}catch(e){}if(t>=20)achUnlock("ice20");}
+let toastT=0;
+function flashToast(text,cls){
+  recordToast.textContent=text;recordToast.className="record-toast show "+(cls||"");
+  clearTimeout(toastT);toastT=setTimeout(function(){recordToast.className="record-toast";},2400);
+}
+function renderBadges(){
+  badgeGrid.innerHTML="";
+  ACH.forEach(a=>{
+    const on=achHas(a.id);
+    const d=document.createElement("div");d.className="badge"+(on?" on":"");
+    const ic=document.createElement("div");ic.className="badge-ic";ic.textContent=a.icon;
+    const nm=document.createElement("div");nm.className="badge-nm";nm.textContent=a.name;
+    const ds=document.createElement("div");ds.className="badge-ds";ds.textContent=a.desc;
+    d.appendChild(ic);d.appendChild(nm);d.appendChild(ds);badgeGrid.appendChild(d);
+  });
+}
+async function showRecords(isStart){
+  if(endless&&!gameover)stopTimer();          // пауза, пока открыта таблица
+  recClose.textContent=isStart?"▶ Играть":"Продолжить";
+  renderBadges();
+  const best=lbGetBest();
+  recPersonal.textContent=best>0?("Личный рекорд: "+best):"Личный рекорд: ещё нет — сыграйте!";
+  recList.innerHTML='<div class="lb-empty">Загрузка…</div>';
+  recordsModal.classList.add("open");
+  const top=await lbTop(50);
+  renderLeaderboard(top,lbGetName(),recList);
+  const myKey=String(lbGetName()||"").trim().toLowerCase();let rank=0;
+  for(let i=0;i<top.length;i++){if(String(top[i].name||"").trim().toLowerCase()===myKey){rank=i+1;break;}}
+  recPersonal.textContent=(best>0?("Личный рекорд: "+best):"Личный рекорд: ещё нет")+(rank?(" · ранг "+rank+" из "+top.length):"");
+}
+function closeRecords(){recordsModal.classList.remove("open");if(endless&&!gameover)startTimer();}
+
 /* ===== endless "trader" mode (staff branch) ===== */
 let endless=false,endlessScore=0,wave=1,etime=0,etimerId=0,gameover=false;
+let runPrevBest=0,runTopOne=0,beatPersonal=false,beatTop=false;
 const ETIME_MAX=42,ETIME_START=28,WAVE_STEP=650;
 const drainRate=w=>1+(w-1)*0.28;
 function frozenCount(){let n=0;for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(board[r][c].fr)n++;return n;}
@@ -808,7 +899,10 @@ function frozenChance(){return Math.min(0.03+wave*0.02,0.18);}
 function meltAround(matches){const melt=new Set();
   matches.forEach(m=>[[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{const r=m.r+dr,c=m.c+dc;
     if(r>=0&&c>=0&&r<SIZE&&c<SIZE&&board[r][c].fr>0)melt.add(r+"-"+c);}));
-  melt.forEach(k=>{const[r,c]=k.split("-").map(Number);board[r][c].fr=Math.max(0,board[r][c].fr-1);});
+  let broken=0;
+  melt.forEach(k=>{const[r,c]=k.split("-").map(Number);const was=board[r][c].fr;board[r][c].fr=Math.max(0,was-1);
+    if(was>0&&board[r][c].fr===0)broken++;});
+  if(broken>0)addIceBroken(broken);
 }
 function endlessShuffle(){
   for(let t=0;t<200;t++){
@@ -824,15 +918,21 @@ function endlessShuffle(){
 function updateEndlessBar(){const p=Math.max(0,Math.min(100,etime/ETIME_MAX*100));
   timeFill.style.right=(100-p)+"%";timeLabel.textContent=Math.ceil(etime);
   endlessHud.classList.toggle("low",etime<=6);}
-function updateEndlessUI(){scoreEl.textContent=endlessScore;waveLabel.textContent="Волна "+wave;updateEndlessBar();}
+function updateEndlessUI(){scoreEl.textContent=endlessScore;waveLabel.textContent="Волна "+wave;
+  bestLabel.textContent="Рекорд "+Math.max(lbGetBest(),endlessScore);updateEndlessBar();}
 function addEndless(base,chain){
   const pts=Math.round(base*chain);endlessScore+=pts;
   etime=Math.min(ETIME_MAX,etime+Math.min(3.2,base*0.012*chain+0.5));
   if(chain>=2)msgEl.textContent="Комбо x"+chain+"! +"+pts;
+  if(chain>=4)achUnlock("combo4");
+  if(endlessScore>=10000)achUnlock("score10k");
+  if(!beatTop&&runTopOne>0&&endlessScore>runTopOne){beatTop=true;flashToast("👑 Лучший результат таблицы!","top");}
+  else if(!beatPersonal&&runPrevBest>0&&endlessScore>runPrevBest){beatPersonal=true;flashToast("🎉 Новый личный рекорд!","");}
   if(endlessScore>=wave*WAVE_STEP){wave++;onWaveUp();}
   updateEndlessUI();
 }
 function onWaveUp(){etime=Math.min(ETIME_MAX,etime+4);sfx("reward",.4);
+  if(wave>=5)achUnlock("wave5");if(wave>=10)achUnlock("wave10");
   msgEl.textContent="Волна "+wave+" — становится сложнее!";
   setMascot("detective",{eye:"Волна "+wave,title:"Сложнее!",text:wave>=4?"Появилась шестая монета и больше «холодных кошельков». Держите темп!":"Время убывает быстрее, льда больше. Не сбавляйте темп!"});}
 function startTimer(){stopTimer();etimerId=setInterval(()=>{
@@ -846,17 +946,23 @@ function startEndless(){
   rewardModal.classList.remove("open");overModal.classList.remove("open");
   endless=true;rewardShown=false;gameover=false;busy=false;sel=null;tutorial=false;
   endlessScore=0;wave=1;etime=ETIME_START;
-  goalEl.classList.add("tut-hidden");endlessHud.style.display="";
+  runPrevBest=lbGetBest();beatPersonal=false;beatTop=false;runTopOne=0;
+  lbTop(1).then(function(t){runTopOne=(t&&t[0]&&Number(t[0].score))||0;}).catch(function(){});
+  goalEl.classList.add("tut-hidden");endlessHud.style.display="";recordsBtn.style.display="";
   shuffleBtn.textContent="Перемешать";
   build();render();updateEndlessUI();
   mascotEl.style.opacity="1";mascotEl.style.pointerEvents="";
   setMascot("detective",{eye:"Режим трейдера",title:"Поехали!",text:"Бесконечный режим: успевайте собирать комбинации, пока не кончилось время. Лёд («холодный кошелёк») двигать нельзя — разбивайте его матчем рядом."});
   msgEl.textContent="Собирайте комбинации, чтобы таймер не обнулился!";
-  startTimer();
+  showRecords(true);   // стартовый экран: рекорды + достижения + кнопка «Играть»
 }
 async function endlessOver(){
   if(gameover)return;gameover=true;stopTimer();busy=true;sel=null;sfx("bad",.55);
-  overScore.textContent=endlessScore;overWave.textContent=wave;overModal.classList.add("open");
+  const isRecord=endlessScore>lbGetBest();
+  if(isRecord)lbSetBest(endlessScore);
+  overScore.textContent=endlessScore;overWave.textContent=wave;
+  overRecord.style.display=(endlessScore>runPrevBest)?"":"none";
+  overModal.classList.add("open");
   setMascot("shrug",{eye:"Время вышло",title:"Игра окончена",text:"Очки: "+endlessScore+", волна "+wave+". Попробуйте побить рекорд!"});
   const name=lbGetName();
   lbList.innerHTML='<div class="lb-empty">Загрузка…</div>';
@@ -962,6 +1068,8 @@ function init(){
   endlessBtn.addEventListener("click",startEndless);
   directEndlessBtn.addEventListener("click",startEndless);
   if(STAFF)directEndlessBtn.style.display="";
+  recordsBtn.addEventListener("click",function(){showRecords(false);});
+  recClose.addEventListener("click",closeRecords);
   overBtn.addEventListener("click",restartEndless);
   overSave.addEventListener("click",submitWithName);
   nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")submitWithName();});
