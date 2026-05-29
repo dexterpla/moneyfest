@@ -153,11 +153,12 @@ button,a{font:inherit}
 .endless-hud .goal-fill{background:linear-gradient(90deg,var(--teal),var(--good))}
 .endless-hud.low .goal-fill{background:linear-gradient(90deg,#ff8a3c,var(--bad))}
 .endless-hud.low #timeLabel{color:var(--bad)}
-.name-row{display:flex;gap:8px;margin:6px 0 4px}
-.name-row input{flex:1;min-width:0;padding:11px 14px;border-radius:var(--r-md);border:2px solid var(--line);
-  background:rgba(255,255,255,.08);color:var(--text);font-family:"Nunito";font-weight:700;font-size:1rem}
+.name-row{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+.name-row input{width:100%;box-sizing:border-box;padding:13px 16px;border-radius:var(--r-md);border:2px solid var(--line);
+  background:rgba(255,255,255,.08);color:var(--text);font-family:"Nunito";font-weight:700;font-size:1.05rem}
 [data-theme="light"] .name-row input{background:#fff;color:var(--ink)}
-.name-row .btn{flex:none}
+.name-row .btn{width:100%}
+.staff-cta{display:block;width:100%;margin-top:10px}
 .lb-wrap{margin:10px 0 4px;text-align:left}
 .lb-title{font-family:"Russo One";font-size:.95rem;margin-bottom:6px;color:var(--text)}
 .lb-list{display:flex;flex-direction:column;gap:5px;max-height:230px;overflow:auto}
@@ -366,6 +367,7 @@ body.dock-pad{padding-bottom:150px}
       <button id="shuffleBtn" class="btn btn-ghost" type="button">Перемешать</button>
     </div>
     <p class="hint-row">Перетащите монету на соседнюю, чтобы поменять их местами</p>
+    <button id="directEndlessBtn" class="btn btn-ghost staff-cta" type="button" style="display:none">🚀 Сразу в бесконечный режим</button>
   </section>
 </main>
 
@@ -433,7 +435,7 @@ const boardEl=document.getElementById("board"),scoreEl=document.getElementById("
   overWave=document.getElementById("overWave"),overBtn=document.getElementById("overBtn"),
   endlessBtn=document.getElementById("endlessBtn"),nameRow=document.getElementById("nameRow"),
   nameInput=document.getElementById("nameInput"),overSave=document.getElementById("overSave"),
-  lbList=document.getElementById("lbList");
+  lbList=document.getElementById("lbList"),directEndlessBtn=document.getElementById("directEndlessBtn");
 
 /* ===== config ===== */
 const SIZE=6,GOAL=2990,STEP=270;
@@ -821,6 +823,7 @@ function startTimer(){stopTimer();etimerId=setInterval(()=>{
 },100);}
 function stopTimer(){if(etimerId)clearInterval(etimerId);etimerId=0;}
 function startEndless(){
+  clearTimeout(introT);
   rewardModal.classList.remove("open");overModal.classList.remove("open");
   endless=true;rewardShown=false;gameover=false;busy=false;sel=null;tutorial=false;
   endlessScore=0;wave=1;etime=ETIME_START;
@@ -938,6 +941,8 @@ function init(){
   startTutorial();
   shuffleBtn.addEventListener("click",()=>{if(tutorial){if(!busy)endTutorial();}else if(endless){endlessShuffle();}else doShuffle(false);});
   endlessBtn.addEventListener("click",startEndless);
+  directEndlessBtn.addEventListener("click",startEndless);
+  if(STAFF)directEndlessBtn.style.display="";
   overBtn.addEventListener("click",restartEndless);
   overSave.addEventListener("click",submitWithName);
   nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")submitWithName();});
