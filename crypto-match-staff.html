@@ -166,7 +166,9 @@ button,a{font:inherit}
   padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.08)}
 [data-theme="light"] .lb-row{background:rgba(20,49,92,.05);border-color:rgba(20,49,92,.1)}
 .lb-row .lb-rank{font-family:"Russo One";opacity:.8;text-align:center}
+.lb-row .lb-main{display:flex;flex-direction:column;min-width:0}
 .lb-row .lb-name{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-row .lb-meta{font-size:.74rem;opacity:.65;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-row .lb-score{font-family:"Russo One";color:var(--yellow)}
 [data-theme="light"] .lb-row .lb-score{color:#c77f00}
 .lb-row.me{border-color:var(--yellow);background:rgba(255,196,31,.16)}
@@ -744,42 +746,55 @@ function doShuffle(auto){
 }
 
 /* ===== leaderboard (staff branch) =====
-   Онлайн-режим: впишите URL веб-приложения Google Apps Script ниже.
-   Пусто => локальная таблица (на этом устройстве). См. README-leaderboard.md */
+   LB_URL/LB_KEY впечатываются при сборке (см. build.py / README-leaderboard.md).
+   Пусто => локальная таблица (на этом устройстве). */
 const LB_URL="https://script.google.com/macros/s/AKfycbys1dmku9b8e_seZ3Pzl2ri3mmSB4iu0Yqpj-FAePyTbYThq9C7fACwPis9HSq8vwJx/exec";
+const LB_KEY="mf-staff-2026-7Kq9Zr3X";
 function lbGetName(){try{return localStorage.getItem("mf-name")||"";}catch(e){return"";}}
 function lbSetName(n){try{localStorage.setItem("mf-name",n);}catch(e){}}
+function lbFmtDate(ts){if(!ts)return"";const d=new Date(ts);if(isNaN(d))return"";
+  const p=x=>(x<10?"0":"")+x;return p(d.getDate())+"."+p(d.getMonth()+1)+"."+String(d.getFullYear()).slice(2);}
+function lbBest(list){ // оставить лучший результат на игрока (дедуп по имени)
+  const best={};
+  list.forEach(e=>{const k=String(e.name||"").trim().toLowerCase();if(!k)return;
+    if(!best[k]||Number(e.score)>Number(best[k].score))best[k]=e;});
+  return Object.keys(best).map(k=>best[k]).sort((a,b)=>b.score-a.score);
+}
 function lbLocalAll(){try{return JSON.parse(localStorage.getItem("mf-lb")||"[]");}catch(e){return[];}}
 function lbLocalAdd(name,score,wave){const a=lbLocalAll();a.push({name,score,wave,ts:Date.now()});
-  a.sort((x,y)=>y.score-x.score);try{localStorage.setItem("mf-lb",JSON.stringify(a.slice(0,50)));}catch(e){}}
-function lbLocalTop(n){return lbLocalAll().slice(0,n||10);}
+  try{localStorage.setItem("mf-lb",JSON.stringify(a.slice(-200)));}catch(e){}}
+function lbLocalTop(n){return lbBest(lbLocalAll()).slice(0,n||10).map(e=>({name:e.name,score:e.score,wave:e.wave,date:lbFmtDate(e.ts)}));}
 async function lbSubmit(name,score,wave){
   if(!LB_URL){lbLocalAdd(name,score,wave);return lbLocalTop();}
-  const u=LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=add"
+  const u=LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=add&key="+encodeURIComponent(LB_KEY)
     +"&name="+encodeURIComponent(name)+"&score="+encodeURIComponent(score)+"&wave="+encodeURIComponent(wave);
-  // 1) fire the write so it reaches the server even if the response is blocked by CORS
+  // запись «неблокируемым» запросом — дойдёт даже если ответ режется CORS
   try{await fetch(u,{mode:"no-cors",cache:"no-store"});}catch(e){}
-  // 2) keep a local backup copy regardless
-  lbLocalAdd(name,score,wave);
-  // 3) read the fresh top to show (falls back to local if read is blocked)
-  return lbTop();
+  lbLocalAdd(name,score,wave); // локальная резервная копия
+  return lbTop();              // читаем свежий топ (или локальный фолбэк)
 }
 async function lbTop(n){n=n||10;
   if(!LB_URL)return lbLocalTop(n);
   try{const r=await fetch(LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=top&n="+n,{method:"GET"});
-    const d=await r.json();return (d&&d.scores)||(Array.isArray(d)?d:[]);}catch(e){return lbLocalTop(n);}
+    const d=await r.json();const s=(d&&d.scores)||(Array.isArray(d)?d:[]);return s.length?s:lbLocalTop(n);}
+  catch(e){return lbLocalTop(n);}
 }
-function renderLeaderboard(list,myName,myScore){
+function renderLeaderboard(list,myName){
   lbList.innerHTML="";
   if(!list||!list.length){lbList.innerHTML='<div class="lb-empty">Пока нет результатов — будьте первым!</div>';return;}
-  let marked=false;
+  const myKey=String(myName||"").trim().toLowerCase();let marked=false;
   list.forEach((e,i)=>{
     const row=document.createElement("div");row.className="lb-row"+(i===0?" top1":"");
-    if(!marked&&myName!=null&&e.name===myName&&Number(e.score)===Number(myScore)){row.classList.add("me");marked=true;}
+    if(!marked&&myKey&&String(e.name||"").trim().toLowerCase()===myKey){row.classList.add("me");marked=true;}
     const rk=document.createElement("span");rk.className="lb-rank";rk.textContent=(i+1);
-    const nm=document.createElement("span");nm.className="lb-name";nm.textContent=e.name||"—"; // textContent => safe from HTML injection
+    const main=document.createElement("span");main.className="lb-main";
+    const nm=document.createElement("span");nm.className="lb-name";nm.textContent=e.name||"—"; // textContent => без HTML-инъекций
+    const meta=document.createElement("span");meta.className="lb-meta";
+    const bits=[];if(e.wave!=null)bits.push("волна "+e.wave);if(e.date)bits.push(e.date);
+    meta.textContent=bits.join(" · ");
+    main.appendChild(nm);if(bits.length)main.appendChild(meta);
     const sc=document.createElement("span");sc.className="lb-score";sc.textContent=e.score;
-    row.appendChild(rk);row.appendChild(nm);row.appendChild(sc);lbList.appendChild(row);
+    row.appendChild(rk);row.appendChild(main);row.appendChild(sc);lbList.appendChild(row);
   });
 }
 
@@ -845,15 +860,15 @@ async function endlessOver(){
   setMascot("shrug",{eye:"Время вышло",title:"Игра окончена",text:"Очки: "+endlessScore+", волна "+wave+". Попробуйте побить рекорд!"});
   const name=lbGetName();
   lbList.innerHTML='<div class="lb-empty">Загрузка…</div>';
-  if(name){nameRow.style.display="none";const top=await lbSubmit(name,endlessScore,wave);renderLeaderboard(top,name,endlessScore);}
-  else{nameRow.style.display="";nameInput.value="";const top=await lbTop();renderLeaderboard(top,null,null);}
+  if(name){nameRow.style.display="none";const top=await lbSubmit(name,endlessScore,wave);renderLeaderboard(top,name);}
+  else{nameRow.style.display="";nameInput.value="";const top=await lbTop();renderLeaderboard(top,null);}
 }
 async function submitWithName(){
   const n=(nameInput.value||"").trim().replace(/\s+/g," ").slice(0,18);
   if(!n){nameInput.focus();return;}
   lbSetName(n);nameRow.style.display="none";
   lbList.innerHTML='<div class="lb-empty">Сохраняем…</div>';
-  const top=await lbSubmit(n,endlessScore,wave);renderLeaderboard(top,n,endlessScore);
+  const top=await lbSubmit(n,endlessScore,wave);renderLeaderboard(top,n);
 }
 function restartEndless(){overModal.classList.remove("open");startEndless();}
 
