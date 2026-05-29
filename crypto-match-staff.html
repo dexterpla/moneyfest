@@ -755,10 +755,10 @@ function lbLocalAdd(name,score,wave){const a=lbLocalAll();a.push({name,score,wav
 function lbLocalTop(n){return lbLocalAll().slice(0,n||10);}
 async function lbSubmit(name,score,wave){
   if(!LB_URL){lbLocalAdd(name,score,wave);return lbLocalTop();}
-  try{await fetch(LB_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({action:"add",name,score,wave})});}
-  catch(e){lbLocalAdd(name,score,wave);}
-  return lbTop();
+  const u=LB_URL+(LB_URL.indexOf("?")>=0?"&":"?")+"action=add"
+    +"&name="+encodeURIComponent(name)+"&score="+encodeURIComponent(score)+"&wave="+encodeURIComponent(wave);
+  try{const r=await fetch(u);const d=await r.json();if(d&&d.scores)return d.scores;throw 0;}
+  catch(e){lbLocalAdd(name,score,wave);return lbLocalTop();}
 }
 async function lbTop(n){n=n||10;
   if(!LB_URL)return lbLocalTop(n);
